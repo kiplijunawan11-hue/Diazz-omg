@@ -1,0 +1,146 @@
+--==================================================
+-- MT YH VIP | AUTO TP GUI
+-- SUMMIT → BC → LOOP
+-- SAFE ULTRA | Anti Stuck | Smooth
+--==================================================
+
+-- Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
+
+-- Remote
+local confirmTeleport = ReplicatedStorage:WaitForChild("ConfirmTeleport")
+
+-- IMPORTANT POINTS
+local summit = Vector3.new(6804,4084,-262)
+local bc = Vector3.new(-954,124,496)
+
+-- GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "MTYH_SAFE_ULTRA"
+ScreenGui.Parent = CoreGui
+
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 200, 0, 220)
+Frame.Position = UDim2.new(0, 50, 0, 50)
+Frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+local UIPadding = Instance.new("UIPadding")
+UIPadding.PaddingTop = UDim.new(0,10)
+UIPadding.PaddingLeft = UDim.new(0,10)
+UIPadding.Parent = Frame
+
+-- Title
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -20, 0, 30)
+Title.BackgroundTransparency = 1
+Title.Text = "MT YH SAFE ULTRA"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 17
+Title.Parent = Frame
+
+-- Delay
+local DelayLabel = Instance.new("TextLabel")
+DelayLabel.Size = UDim2.new(1, -20, 0, 20)
+DelayLabel.Position = UDim2.new(0,0,0,40)
+DelayLabel.BackgroundTransparency = 1
+DelayLabel.Text = "Delay (sec):"
+DelayLabel.TextColor3 = Color3.fromRGB(255,255,255)
+DelayLabel.Font = Enum.Font.Gotham
+DelayLabel.TextSize = 14
+DelayLabel.TextXAlignment = Enum.TextXAlignment.Left
+DelayLabel.Parent = Frame
+
+local DelayInput = Instance.new("TextBox")
+DelayInput.Size = UDim2.new(1, -20, 0, 25)
+DelayInput.Position = UDim2.new(0,0,0,60)
+DelayInput.BackgroundColor3 = Color3.fromRGB(50,50,50)
+DelayInput.TextColor3 = Color3.fromRGB(255,255,255)
+DelayInput.Text = "1"
+DelayInput.ClearTextOnFocus = false
+DelayInput.Font = Enum.Font.Gotham
+DelayInput.TextSize = 14
+DelayInput.Parent = Frame
+
+-- Toggle
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(1, -20, 0, 30)
+ToggleButton.Position = UDim2.new(0,0,0,100)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(0,150,136)
+ToggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+ToggleButton.Text = "Start TP"
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 16
+ToggleButton.Parent = Frame
+
+-- Minimize
+local MinButton = Instance.new("TextButton")
+MinButton.Size = UDim2.new(0, 30, 0, 30)
+MinButton.Position = UDim2.new(1, -35, 0, 5)
+MinButton.BackgroundColor3 = Color3.fromRGB(255,0,0)
+MinButton.Text = "-"
+MinButton.TextColor3 = Color3.fromRGB(255,255,255)
+MinButton.Font = Enum.Font.GothamBold
+MinButton.TextSize = 18
+MinButton.Parent = Frame
+
+-- Logic
+local isActive = false
+
+ToggleButton.MouseButton1Click:Connect(function()
+    isActive = not isActive
+    ToggleButton.Text = isActive and "Stop TP" or "Start TP"
+end)
+
+MinButton.MouseButton1Click:Connect(function()
+    Frame.Visible = not Frame.Visible
+end)
+
+-- SAFE ULTRA TP
+local function safeTP(pos)
+    for i = 1, 3 do
+        local ok = pcall(function()
+            TweenService:Create(
+                HumanoidRootPart,
+                TweenInfo.new(0.45, Enum.EasingStyle.Linear),
+                {CFrame = CFrame.new(pos)}
+            ):Play()
+        end)
+        if ok then
+            pcall(function()
+                confirmTeleport:FireServer()
+            end)
+            return
+        end
+        task.wait(0.3)
+    end
+end
+
+-- MAIN LOOP
+task.spawn(function()
+    while true do
+        if isActive then
+            local delayTime = tonumber(DelayInput.Text) or 1
+
+            safeTP(summit)
+            task.wait(delayTime)
+
+            if not isActive then continue end
+
+            safeTP(bc)
+            task.wait(delayTime)
+        else
+            task.wait(0.15)
+        end
+    end
+end)
